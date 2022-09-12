@@ -3,7 +3,7 @@
 
 # TASK 4 Multilayer Perception for Image Classification
 
-# In[63]:
+# In[1]:
 
 
 # Data Loader
@@ -12,7 +12,26 @@ import numpy as np
 from random import shuffle
 from skimage.io import imread
 from skimage.transform import resize
+
+
+# In[2]:
+
+
 def gen_labels(im_name, pat1, pat2):
+    '''
+    Parameters
+    ----------
+    im_name : Str
+        The image file name.
+    pat1 : Str
+        A string pattern in the filename for 1st class, e.g "Mel"
+    pat2 : Str
+        A string pattern in the filename 2nd class, e.g, "Nev"
+    Returns
+    -------
+    Label : Numpy array        
+        Class label of the filename name based on its pattern.
+    '''
     if pat1 in im_name:
         label = np.array([0])
     elif pat2 in im_name:
@@ -20,70 +39,61 @@ def gen_labels(im_name, pat1, pat2):
     return label
 
 
-# In[64]:
-
-
 def get_data(data_path, data_list, img_h, img_w):
     """
     Parameters
     ----------
     train_data_path : Str
-    Path to the data directory
+        Path to the data directory
     train_list : List
-    A list containing the name of the images.
+        A list containing the name of the images.
     img_h : Int
-    image height to be resized to.
+        image height to be resized to.
     img_w : Int
-    image width to be resized to.
+        image width to be resized to.    
     Returns
     -------
     img_labels : Nested List
-    A nested list containing the loaded images along with their
-    correcponding labels.
+        A nested list containing the loaded images along with their
+        correcponding labels.
     """
-    img_labels = []
+    img_labels = []      
     for item in enumerate(data_list):
-        img = imread(os.path.join(data_path, item[1]), as_gray=True)  # "as_grey"
-    img = resize(img, (img_h, img_w), anti_aliasing=True).astype('float32')
-    img_labels.append([np.array(img), gen_labels(item[1], 'Mel', 'Nev')])
-
-    if item[0] % 100 == 0:
-        print('Reading: {0}/{1} of train images'.format(item[0], len(data_list)))
-
+        img = imread(os.path.join(data_path, item[1]), as_gray = True) # "as_grey"
+        img = resize(img, (img_h, img_w), anti_aliasing = True).astype('float32')
+        img_labels.append([np.array(img), gen_labels(item[1], 'Mel', 'Nev')])
+       
+        if item[0] % 100 == 0:
+             print('Reading: {0}/{1}  of train images'.format(item[0], len(data_list)))
+             
     shuffle(img_labels)
     return img_labels
 
 
-# In[65]:
-
-
 def get_data_arrays(nested_list, img_h, img_w):
     """
-     Parameters
-     ----------
-     nested_list : nested list
-     nested list of image arrays with corresponding class labels.
-     img_h : Int
-     Image height.
-     img_w : Int
-     Image width.
-     Returns
-      -------
-     img_arrays : Numpy array
-     4D Array with the size of (n_data,img_h,img_w, 1)
-     label_arrays : Numpy array
-     1D array with the size (n_data).
+    Parameters
+    ----------
+    nested_list : nested list
+        nested list of image arrays with corresponding class labels.
+    img_h : Int
+        Image height.
+    img_w : Int
+        Image width.
+    Returns
+    -------
+    img_arrays : Numpy array
+        4D Array with the size of (n_data,img_h,img_w, 1)
+    label_arrays : Numpy array
+        1D array with the size (n_data).
     """
-    img_arrays = np.zeros((len(nested_list), img_h, img_w), dtype=np.float32)
-    label_arrays = np.zeros((len(nested_list)), dtype=np.int32)
+    img_arrays = np.zeros((len(nested_list), img_h, img_w), dtype = np.float32)
+    label_arrays = np.zeros((len(nested_list)), dtype = np.int32)
     for ind in range(len(nested_list)):
         img_arrays[ind] = nested_list[ind][0]
         label_arrays[ind] = nested_list[ind][1]
-    img_arrays = np.expand_dims(img_arrays, axis=3)
+    img_arrays = np.expand_dims(img_arrays, axis =3)
     return img_arrays, label_arrays
-
-
-# In[66]:
 
 
 def get_train_test_arrays(train_data_path, test_data_path, train_list,
@@ -93,18 +103,18 @@ def get_train_test_arrays(train_data_path, test_data_path, train_list,
     the size of the image and return the image and label arrays for
     train and test sets.
     """
-
+   
     train_data = get_data(train_data_path, train_list, img_h, img_w)
     test_data = get_data(test_data_path, test_list, img_h, img_w)
-
-    train_img, train_label = get_data_arrays(train_data, img_h, img_w)
+   
+    train_img, train_label =  get_data_arrays(train_data, img_h, img_w)
     test_img, test_label = get_data_arrays(test_data, img_h, img_w)
-    del (train_data)
-    del (test_data)
+    del(train_data)
+    del(test_data)      
     return train_img, test_img, train_label, test_label
 
 
-# In[67]:
+# In[3]:
 
 
 img_w, img_h = 128, 128 # Setting the width and heights of the images.
@@ -118,7 +128,7 @@ x_train, x_test, y_train, y_test = get_train_test_arrays(
      train_list, test_list, img_h, img_w)
 
 
-# In[68]:
+# In[4]:
 
 
 print(type(x_train), x_train.shape,x_test.shape,img_w)
@@ -126,7 +136,7 @@ print(type(x_train), x_train.shape,x_test.shape,img_w)
 
 # Functional API
 
-# In[69]:
+# In[5]:
 
 
 from tensorflow.keras.layers import Input, Dense, Flatten 
@@ -151,12 +161,14 @@ def model(img_width, img_height, img_ch, base_dense):
         return clf
 
 
-# In[89]:
+# # n_epochs = 50 Batch_size = 16 base_dense = 64 LR = 0.0001
+
+# In[6]:
 
 
-base_dense = 256#64
+base_dense = 64
 batchsize = 16
-n_epochs = 1500  #50
+n_epochs = 50  
 LR = 0.0001  #0.1
 clf =  model(img_w, img_h, 1, base_dense)
 
@@ -164,21 +176,7 @@ clf.compile(loss='binary_crossentropy',
               optimizer = SGD(lr = LR),
               metrics=['binary_accuracy'])
 
-
-# In[90]:
-
-
-print(img_w,y_train.shape,y_test.shape,x_test.shape,x_train.shape)
-
-
-# In[91]:
-
-
 clf_hist = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
-
-
-# In[92]:
-
 
 import matplotlib.pyplot as plt
 plt.figure(figsize=(4, 4))
@@ -192,20 +190,121 @@ plt.xlabel("Epochs")
 plt.ylabel("Loss Value")
 plt.legend();
 plt.show()
+print('the minimum var_loss is', np.min(clf_hist.history["val_loss"]))
+print('the Best epoch nr is', np.argmin(clf_hist.history["val_loss"]))
 
 
-# TASK 5 Convolutional Neural Network
+# # n_epochs = 50 Batch_size = 16 base_dense = 64 LR = 0.1
+
+# In[7]:
+
+
+base_dense = 64
+batchsize = 16
+n_epochs = 50  
+LR = 0.1  #0.1
+clf =  model(img_w, img_h, 1, base_dense)
+
+clf.compile(loss='binary_crossentropy',
+              optimizer = SGD(lr = LR),
+              metrics=['binary_accuracy'])
+
+clf_hist = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(4, 4))
+plt.title("Learning curve")
+plt.plot(clf_hist.history["loss"], label="loss")
+plt.plot(clf_hist.history["val_loss"], label="val_loss")
+plt.plot( np.argmin(clf_hist.history["val_loss"]),
+     np.min(clf_hist.history["val_loss"]),
+     marker="x", color="r", label="best model")
+plt.xlabel("Epochs")
+plt.ylabel("Loss Value")
+plt.legend();
+plt.show()
+print('the minimum var_loss is', np.min(clf_hist.history["val_loss"]))
+print('the Best epoch nr is', np.argmin(clf_hist.history["val_loss"]))
+
+
+# # n_epochs = 150 Batch_size = 16 base_dense = 64 LR = 0.0001
+
+# In[8]:
+
+
+base_dense = 64
+batchsize = 16
+n_epochs = 150  
+LR = 0.0001  #0.1
+clf =  model(img_w, img_h, 1, base_dense)
+
+clf.compile(loss='binary_crossentropy',
+              optimizer = SGD(lr = LR),
+              metrics=['binary_accuracy'])
+
+clf_hist = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(4, 4))
+plt.title("Learning curve")
+plt.plot(clf_hist.history["loss"], label="loss")
+plt.plot(clf_hist.history["val_loss"], label="val_loss")
+plt.plot( np.argmin(clf_hist.history["val_loss"]),
+     np.min(clf_hist.history["val_loss"]),
+     marker="x", color="r", label="best model")
+plt.xlabel("Epochs")
+plt.ylabel("Loss Value")
+plt.legend();
+plt.show()
+print('the minimum var_loss is', np.min(clf_hist.history["val_loss"]))
+print('the Best epoch nr is', np.argmin(clf_hist.history["val_loss"]))
+
+
+# # n_epochs = 150 Batch_size = 16 base_dense = 256 LR = 0.0001
+
+# In[9]:
+
+
+base_dense = 256
+batchsize = 16
+n_epochs = 150  
+LR = 0.0001  #0.1
+clf =  model(img_w, img_h, 1, base_dense)
+
+clf.compile(loss='binary_crossentropy',
+              optimizer = SGD(lr = LR),
+              metrics=['binary_accuracy'])
+
+clf_hist = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(4, 4))
+plt.title("Learning curve")
+plt.plot(clf_hist.history["loss"], label="loss")
+plt.plot(clf_hist.history["val_loss"], label="val_loss")
+plt.plot( np.argmin(clf_hist.history["val_loss"]),
+     np.min(clf_hist.history["val_loss"]),
+     marker="x", color="r", label="best model")
+plt.xlabel("Epochs")
+plt.ylabel("Loss Value")
+plt.legend();
+plt.show()
+print('the minimum var_loss is', np.min(clf_hist.history["val_loss"]))
+print('the Best epoch nr is', np.argmin(clf_hist.history["val_loss"]))
+
+
+# # TASK 5 Convolutional Neural Network
 
 # Sequential API
 
-# In[93]:
+# In[10]:
 
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 
 
-# In[94]:
+# In[11]:
 
 
 def model(img_width, img_height, img_ch, base):
@@ -233,7 +332,7 @@ def model(img_width, img_height, img_ch, base):
         return clf
 
 
-# In[95]:
+# In[12]:
 
 
 # def model(img_ch, img_width, img_height):
@@ -254,7 +353,73 @@ def model(img_width, img_height, img_ch, base):
 #      return model
 
 
-# In[102]:
+# # epochs=20 batch_size=8 number_layer=32 lr=0.00001
+
+# In[13]:
+
+
+firstlayer = 32
+batchsize = 8
+n_epochs = 20   # 20
+learningrate = 0.00001   #0.00001
+
+clf =  model(img_w, img_h, 1,firstlayer)
+
+clf.compile(loss='binary_crossentropy',
+              optimizer = SGD(lr = learningrate),
+              metrics=['binary_accuracy'])
+
+clf_hist2 = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(4, 4))
+plt.title("Learning curve")
+plt.plot(clf_hist.history["loss"], label="loss")
+plt.plot(clf_hist.history["val_loss"], label="val_loss")
+plt.plot( np.argmin(clf_hist.history["val_loss"]),
+     np.min(clf_hist.history["val_loss"]),
+     marker="x", color="r", label="best model")
+plt.xlabel("Epochs")
+plt.ylabel("Loss Value")
+plt.legend();
+plt.show()
+
+
+# # epochs=200 batch_size=8 number_layer=32 lr=0.00001
+
+# In[14]:
+
+
+firstlayer = 32
+batchsize = 8
+n_epochs = 200   # 20
+learningrate = 0.00001   #0.00001
+
+clf =  model(img_w, img_h, 1,firstlayer)
+
+clf.compile(loss='binary_crossentropy',
+              optimizer = SGD(lr = learningrate),
+              metrics=['binary_accuracy'])
+
+clf_hist2 = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(4, 4))
+plt.title("Learning curve")
+plt.plot(clf_hist.history["loss"], label="loss")
+plt.plot(clf_hist.history["val_loss"], label="val_loss")
+plt.plot( np.argmin(clf_hist.history["val_loss"]),
+     np.min(clf_hist.history["val_loss"]),
+     marker="x", color="r", label="best model")
+plt.xlabel("Epochs")
+plt.ylabel("Loss Value")
+plt.legend();
+plt.show()
+
+
+# # epochs=200 batch_size=8 number_layer=32 lr=0.0001
+
+# In[15]:
 
 
 firstlayer = 32
@@ -268,15 +433,7 @@ clf.compile(loss='binary_crossentropy',
               optimizer = SGD(lr = learningrate),
               metrics=['binary_accuracy'])
 
-
-# In[103]:
-
-
 clf_hist2 = clf.fit(x_train, y_train, epochs = n_epochs, batch_size = batchsize, validation_data = (x_test,y_test))
-
-
-# In[104]:
-
 
 import matplotlib.pyplot as plt
 plt.figure(figsize=(4, 4))
